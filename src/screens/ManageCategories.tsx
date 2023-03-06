@@ -7,7 +7,7 @@ import CustomText from 'components/CustomText'
 
 import Colors from 'utils/colors'
 
-const Dashboard: FC = () => {
+const ManageCategories: FC = () => {
   return (
     <Center style={styles.container}>
       <CustomText>No categories found</CustomText>
@@ -18,7 +18,7 @@ const Dashboard: FC = () => {
   )
 }
 
-export default Dashboard
+export default ManageCategories
 
 const styles = StyleSheet.create({
   button: { backgroundColor: Colors.purple, borderRadius: 5, marginTop: 10 },
