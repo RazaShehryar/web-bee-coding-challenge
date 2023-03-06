@@ -20,7 +20,7 @@ const renderItem = ({ item, index }: { item: Category; index: number }) => (
   <CategoryItem item={item} index={index} />
 )
 
-const EmptyCategory = () => <Text style={styles.emptyText}>No Categories to display</Text>
+const EmptyList = () => <Text style={styles.emptyText}>No Categories to display</Text>
 
 const ManageCategories: FC = observer(() => {
   const { orientation, categories } = store
@@ -40,7 +40,7 @@ const ManageCategories: FC = observer(() => {
       <FlatList
         key={orientation}
         data={Object.values(categories)}
-        ListEmptyComponent={EmptyCategory}
+        ListEmptyComponent={EmptyList}
         renderItem={renderItem}
         numColumns={isIpad ? 2 : orientation === 'PORTRAIT' ? 1 : 2}
         keyExtractor={keyExtractor}

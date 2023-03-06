@@ -4,8 +4,8 @@ import { FC } from 'react'
 
 import store from 'context/store'
 
-import Category from 'screens/Category'
 import Dashboard from 'screens/Dashboard'
+import MachineTypeScreen from 'screens/MachineTypeScreen'
 import ManageCategories from 'screens/ManageCategories'
 
 const Drawer = createDrawerNavigator()
@@ -16,11 +16,11 @@ const DrawerNavigator: FC = () => {
   return (
     <Drawer.Navigator initialRouteName="Dashboard">
       <Drawer.Screen name="Dashboard" component={Dashboard} />
-      {Object.values(categories).map((item, index) => (
+      {Object.values(categories).map((item) => (
         <Drawer.Screen
-          key={index.toString()}
+          key={item.id}
           name={item.id}
-          component={Category}
+          component={MachineTypeScreen}
           options={{ title: item.title }}
         />
       ))}

@@ -3,6 +3,7 @@ import { makeAutoObservable } from 'mobx'
 import { makePersistable } from 'mobx-persist-store'
 
 import { Category, Field } from 'models/Category'
+import { MachineType, MachineTypeValue } from 'models/MachineType'
 
 const randomProperty = (obj: Record<string, Field>) => {
   const keys = Object.keys(obj)
@@ -12,7 +13,9 @@ const randomProperty = (obj: Record<string, Field>) => {
 class Store {
   isHydrated = false
   categories: Record<string, Category> = {}
+  items: Record<string, MachineType> = {}
   orientation = 'PORTRAIT'
+  selectedDateItem: null | (MachineTypeValue & { id: string }) = null
 
   constructor() {
     makeAutoObservable(this)
@@ -28,8 +31,58 @@ class Store {
 
   setOrientation = (value: 'LANDSCAPE' | 'PORTRAIT') => (this.orientation = value)
 
+  addMachineTypeItem = (id: string, categoryId: string) => {
+    this.items = {
+      ...this.items,
+      [id]: { id, categoryId, fields: this.items[categoryId]?.fields ?? {} },
+    }
+    const itemFields: MachineType['fields'] = {}
+
+    const returnValue = (fieldId: string) => {
+      const { type } = this.categories[categoryId].fields[fieldId]
+
+      switch (type) {
+        case 'checkbox':
+          return false
+        case 'string':
+          return ''
+        case 'number':
+          return 0
+        case 'date':
+          return new Date()
+        default:
+          return 0
+      }
+    }
+    Object.keys(this.categories[categoryId].fields).forEach(
+      (value) =>
+        (itemFields[value] = {
+          value: returnValue(this.categories[categoryId].fields[value].id),
+          fieldId: this.categories[categoryId].fields[value].id,
+        }),
+    )
+    this.items[id].fields = itemFields
+  }
   addCategory = (value: Category) => (this.categories[value.id] = value)
 
+  setSelectedDateItem = (value: null | (MachineTypeValue & { id: string })) =>
+    (this.selectedDateItem = value)
+  updateFieldValue = (
+    text: string | boolean | Date | number,
+    itemId: string,
+    fieldItem: MachineTypeValue,
+  ) => {
+    this.items = {
+      ...this.items,
+      [itemId]: {
+        ...this.items[itemId],
+        fields: {
+          ...this.items[itemId].fields,
+          [fieldItem.fieldId]: { ...fieldItem, value: text },
+        },
+      },
+    }
+  }
   updateTitleField = (categoryId: string, fieldId: string) =>
     (this.categories[categoryId].titleField = fieldId)
 
