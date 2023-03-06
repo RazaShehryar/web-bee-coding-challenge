@@ -1,7 +1,13 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons'
 import { observer } from 'mobx-react-lite'
 import { FC, useCallback, useState } from 'react'
-import { GestureResponderEvent, StyleSheet, View } from 'react-native'
+import {
+  GestureResponderEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+  View,
+} from 'react-native'
+import { TextInputFocusEventData } from 'react-native'
 import { Menu, Text, TextInput } from 'react-native-paper'
 
 import store from 'context/store'
@@ -61,6 +67,13 @@ const FieldItem: FC<Props> = ({ item, categoryId }) => {
     [categoryId, closeMenu, item.id],
   )
 
+  const onBlur = useCallback(
+    (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+      store.checkAndFixDuplicates(e.nativeEvent.text, categoryId, item.id)
+    },
+    [categoryId, item.id],
+  )
+
   return (
     <View style={{ zIndex: 100 }}>
       <Row alignItems="center" style={styles.container}>
@@ -73,6 +86,7 @@ const FieldItem: FC<Props> = ({ item, categoryId }) => {
             outlineColor={`${Colors.gray}50`}
             style={styles.textInput}
             placeholder="Field"
+            onBlur={onBlur}
           />
           <Text variant="bodySmall" style={styles.typeText} onPress={onTextPress}>
             {item.type === 'string' ? 'TEXT' : item.type.toUpperCase()}

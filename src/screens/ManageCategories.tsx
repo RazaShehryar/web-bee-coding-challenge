@@ -1,10 +1,12 @@
 import { observer } from 'mobx-react-lite'
 import { FC, useCallback } from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
-import { Button, Text } from 'react-native-paper'
+import { Button } from 'react-native-paper'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import uuid from 'react-native-uuid'
 
 import CategoryItem from 'components/CategoryItem'
+import EmptyList from 'components/EmptyList'
 
 import store from 'context/store'
 
@@ -20,10 +22,10 @@ const renderItem = ({ item, index }: { item: Category; index: number }) => (
   <CategoryItem item={item} index={index} />
 )
 
-const EmptyList = () => <Text style={styles.emptyText}>No Categories to display</Text>
-
 const ManageCategories: FC = observer(() => {
   const { orientation, categories } = store
+
+  const insets = useSafeAreaInsets()
 
   const onAddCategory = useCallback(() => {
     const id = uuid.v4() as string
@@ -40,13 +42,16 @@ const ManageCategories: FC = observer(() => {
       <FlatList
         key={orientation}
         data={Object.values(categories)}
-        ListEmptyComponent={EmptyList}
+        ListEmptyComponent={<EmptyList title="No Categories to display" />}
         renderItem={renderItem}
         numColumns={isIpad ? 2 : orientation === 'PORTRAIT' ? 1 : 2}
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.contentContainer}
       />
-      <Button mode="contained" style={styles.button} onPress={onAddCategory}>
+      <Button
+        mode="contained"
+        style={[styles.button, { bottom: insets.bottom || 4 }]}
+        onPress={onAddCategory}>
         ADD NEW CATEGORY
       </Button>
     </View>
@@ -56,8 +61,7 @@ const ManageCategories: FC = observer(() => {
 export default ManageCategories
 
 const styles = StyleSheet.create({
-  emptyText: { color: Colors.gray, textAlign: 'center', marginTop: 10 },
-  contentContainer: { paddingBottom: 40 },
+  contentContainer: { paddingBottom: 80 },
   button: {
     backgroundColor: Colors.purple,
     borderRadius: 5,

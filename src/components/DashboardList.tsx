@@ -1,11 +1,9 @@
-import { useRoute } from '@react-navigation/native'
 import { observer } from 'mobx-react-lite'
 import { FC, useCallback, useMemo } from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
 import { Button, Text } from 'react-native-paper'
 import uuid from 'react-native-uuid'
 
-import EmptyList from 'components/EmptyList'
 import MachineTypeItem from 'components/MachineTypeItem'
 import Row from 'components/Row'
 
@@ -16,18 +14,18 @@ import { MachineType } from 'models/MachineType'
 import Colors from 'utils/colors'
 import { isIpad } from 'utils/platform'
 
+import EmptyList from './EmptyList'
+
 const keyExtractor = (item: MachineType) => item.id
 
-const renderItem = ({ item, index }: { item: MachineType; index: number }) => (
-  <MachineTypeItem item={item} index={index} />
-)
+type Props = {
+  categoryId: string
+}
 
-const MachineTypeScreen: FC = () => {
-  const route = useRoute()
-
+const DashboardList: FC<Props> = ({ categoryId }) => {
   const { categories, orientation, items } = store
 
-  const category = useMemo(() => categories[route.name], [categories, route.name])
+  const category = useMemo(() => categories[categoryId], [categories, categoryId])
 
   const onMachineTypeItemAdd = useCallback(() => {
     const id = uuid.v4() as string
@@ -35,8 +33,15 @@ const MachineTypeScreen: FC = () => {
   }, [category.id])
 
   const data = useMemo(
-    () => Object.values(items).filter((value) => value.categoryId === category.id),
-    [category.id, items],
+    () => Object.values(items).filter((value) => value.categoryId === categoryId),
+    [categoryId, items],
+  )
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: MachineType; index: number }) => (
+      <MachineTypeItem item={item} index={index} categoryId={categoryId} />
+    ),
+    [categoryId],
   )
 
   return (
@@ -63,18 +68,19 @@ const MachineTypeScreen: FC = () => {
         renderItem={renderItem}
         numColumns={isIpad ? 2 : orientation === 'PORTRAIT' ? 1 : 2}
         keyExtractor={keyExtractor}
+        scrollEnabled={false}
         contentContainerStyle={styles.contentContainer}
       />
     </View>
   )
 }
 
-export default observer(MachineTypeScreen)
+export default observer(DashboardList)
 
 const styles = StyleSheet.create({
-  contentContainer: { paddingBottom: 80 },
+  contentContainer: { paddingBottom: 80, marginVertical: 10 },
   title: { fontWeight: 'bold' },
-  container: { flex: 1 },
+  container: { flex: 1, marginTop: 10 },
   button: {
     backgroundColor: Colors.purple,
     borderRadius: 5,

@@ -34,7 +34,10 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
     : 'UNNAMED FIELD'
 
   const isOddAndLastIndex = useMemo(
-    () => (index + 1) % 2 === 1 && index === Object.keys(categories).length - 1,
+    () =>
+      (index + 1) % 2 === 1 &&
+      Object.keys(categories).length &&
+      index === Object.keys(categories).length - 1,
     [categories, index],
   )
 
@@ -75,7 +78,8 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
   }, [item.id])
 
   return (
-    <Column style={[styles.container, { flex: isOddAndLastIndex ? 0.48 : 0.5 }]}>
+    <Column
+      style={[styles.container, { maxWidth: isOddAndLastIndex ? '49%' : undefined }]}>
       <Text variant="titleLarge">{item.title}</Text>
       <TextInput
         mode="outlined"

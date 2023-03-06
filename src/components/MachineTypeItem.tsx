@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/build/Ionicons'
 import { useRoute } from '@react-navigation/native'
 import { observer } from 'mobx-react-lite'
 import { FC, useCallback, useMemo } from 'react'
@@ -11,37 +12,29 @@ import store from 'context/store'
 import { MachineType, MachineTypeValue } from 'models/MachineType'
 
 import Colors from 'utils/colors'
+import { boolValue, inputValue } from 'utils/inputValue'
 
 import Row from './Row'
 
-type Props = { item: MachineType; index: number }
+type Props = { item: MachineType; index: number; categoryId?: string }
 
-const inputValue = (value: string | number | Date | boolean) => {
-  if (typeof value === 'string') {
-    return value
-  } else if (typeof value === 'boolean') {
-    return ''
-  } else if (value instanceof Date) {
-    return `${value.getDate()}/${value.getMonth() + 1}/${value.getFullYear()}`
-  } else {
-    return ''
-  }
-}
+const MachineTypeItem: FC<Props> = ({ item, index, categoryId }) => {
+  const { categories, items } = store
 
-const boolValue = (value: string | number | Date | boolean) =>
-  typeof value === 'boolean' ? value : false
-
-const MachineTypeItem: FC<Props> = ({ item, index }) => {
   const isOddAndLastIndex = useMemo(
-    () => (index + 1) % 2 === 1 && index === Object.keys(item.fields).length - 1,
-    [index, item.fields],
+    () =>
+      (index + 1) % 2 === 1 &&
+      Object.keys(items).length > 1 &&
+      index === Object.keys(items).length - 1,
+    [index, items],
   )
 
   const route = useRoute()
 
-  const { categories } = store
-
-  const selectedCategory = useMemo(() => categories[route.name], [categories, route.name])
+  const selectedCategory = useMemo(
+    () => categories[categoryId || route.name],
+    [categories, categoryId, route.name],
+  )
 
   const onChangeValue = useCallback(
     (text: string | boolean | number, fieldItem: MachineTypeValue) => {
@@ -50,12 +43,20 @@ const MachineTypeItem: FC<Props> = ({ item, index }) => {
     [item.id],
   )
 
+  const onRemoveItem = useCallback(() => {
+    store.removeItem(item.id)
+  }, [item.id])
+
+  const title = useMemo(() => {
+    const { value } = item.fields[selectedCategory.titleField] || {}
+    return inputValue(value) || 'Unnamed Field'
+  }, [item.fields, selectedCategory.titleField])
+
   return (
-    <Column style={[styles.container, { flex: isOddAndLastIndex ? 0.48 : 0.5 }]}>
-      <Text variant="titleLarge">
-        {selectedCategory.fields[selectedCategory.titleField].title}
-      </Text>
-      {Object.values(selectedCategory.fields).map((fieldItem) => {
+    <Column
+      style={[styles.container, { maxWidth: isOddAndLastIndex ? '49%' : undefined }]}>
+      <Text variant="titleLarge">{title}</Text>
+      {Object.values?.(selectedCategory?.fields ?? {}).map((fieldItem) => {
         const field = selectedCategory.fields[fieldItem.id]
         const { value } = item.fields[fieldItem.id] || {}
 
@@ -117,6 +118,15 @@ const MachineTypeItem: FC<Props> = ({ item, index }) => {
           />
         )
       })}
+      <Row style={styles.binRow} onPress={onRemoveItem}>
+        <Ionicons
+          name="trash-bin-sharp"
+          size={24}
+          color={Colors.purple}
+          style={styles.icon}
+        />
+        <Text style={styles.removeText}>Remove</Text>
+      </Row>
     </Column>
   )
 }
@@ -124,17 +134,9 @@ const MachineTypeItem: FC<Props> = ({ item, index }) => {
 export default observer(MachineTypeItem)
 
 const styles = StyleSheet.create({
-  bottomRow: { marginTop: 10 },
   removeText: { color: Colors.purple },
-  binRow: { marginLeft: 10 },
-  newFieldButton: { borderRadius: 5, borderWidth: 0.5, borderColor: `${Colors.gray}40` },
+  binRow: { marginTop: 10 },
   icon: { marginRight: 6 },
-  button: {
-    backgroundColor: Colors.purple,
-    borderRadius: 5,
-    width: '90%',
-    marginTop: 10,
-  },
   textInput: { marginTop: 10, width: '90%', height: 40 },
   container: {
     backgroundColor: Colors.white,

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import omit from 'lodash/omit'
 import { makeAutoObservable } from 'mobx'
 import { makePersistable } from 'mobx-persist-store'
 
@@ -30,6 +31,8 @@ class Store {
   }
 
   setOrientation = (value: 'LANDSCAPE' | 'PORTRAIT') => (this.orientation = value)
+
+  removeItem = (id: string) => (this.items = omit(this.items, id))
 
   addMachineTypeItem = (id: string, categoryId: string) => {
     this.items = {
@@ -90,12 +93,16 @@ class Store {
     (this.categories[categoryId].title = text)
 
   updateFieldTitle = (text: string, categoryId: string, fieldId: string) => {
-    const alreadyExists = Object.values(this.categories[categoryId].fields).some(
-      (value) => value.title.toLowerCase() === text.toLowerCase(),
-    )
+    this.categories[categoryId].fields[fieldId].title = text
+  }
+
+  checkAndFixDuplicates = (text: string, categoryId: string, fieldId: string) => {
+    const alreadyExists = Object.values(this.categories[categoryId].fields)
+      .filter((val) => val.id !== fieldId)
+      .some((value) => value.title.toLowerCase() === text.toLowerCase())
     this.categories[categoryId].fields[fieldId].title = alreadyExists
-      ? this.categories[categoryId].fields[fieldId].title
-      : text
+      ? ''
+      : this.categories[categoryId].fields[fieldId].title
   }
 
   updateFieldType = (type: Field['type'], categoryId: string, fieldId: string) => {
