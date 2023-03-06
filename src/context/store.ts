@@ -20,7 +20,7 @@ class Store {
     makeAutoObservable(this)
     makePersistable(this, {
       name: 'Store',
-      properties: [],
+      properties: ['categories', 'items'],
       storage: AsyncStorage,
       stringify: true,
     })
