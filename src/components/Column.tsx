@@ -1,7 +1,11 @@
 import { FC, ReactNode } from 'react'
 import { Pressable, View, ViewStyle } from 'react-native'
 
-type Props = { children: ReactNode; style?: ViewStyle; onPress?: () => void }
+type Props = {
+  children: ReactNode
+  style?: ViewStyle | ViewStyle[]
+  onPress?: () => void
+}
 
 const Column: FC<Props> = ({ children, style, onPress }) => {
   if (onPress) {
