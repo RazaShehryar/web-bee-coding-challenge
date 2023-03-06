@@ -31,13 +31,8 @@
       "utils/*": ["./utils/*"]
     }
   },
-  "include": ["src", "App.tsx", "shared", "dots.d.ts", "pinchable.d.ts", "react-native-collapsible.d.ts"],
+  "include": ["src", "App.tsx"],
   "exclude": [
     "**/node_modules",
-    "src/models-edgedb/**",
-    "**/functions",
-    "**/functions-v2",
-    "**/*.spec.ts",
-    "plugins/withAndroidVerifiedLinksWorkaround.js"
   ]
 }
