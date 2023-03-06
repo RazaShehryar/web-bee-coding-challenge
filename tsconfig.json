@@ -1,6 +1,43 @@
 {
   "extends": "expo/tsconfig.base",
+  "compileOnSave": true,
   "compilerOptions": {
-    "strict": true
-  }
+    "strict": true,
+    "jsx": "react-native",
+    "target": "esnext",
+    "lib": ["dom", "esnext"],
+    "noEmit": true,
+    "skipLibCheck": true,
+    "module": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+    "moduleResolution": "node",
+    "baseUrl": "src",
+    "paths": {
+      "assets/*": ["../assets/*"],
+      "components/*": ["./components/*"],
+      "context/*": ["./context/*"],
+      "helpers/*": ["./helpers/*"],
+      "hooks/*": ["./hooks/*"],
+      "models/*": ["./models/*"],
+      "navigation/*": ["./navigation/*"],
+      "screens/*": ["./screens/*"],
+      "static/*": ["./static/*"],
+      "styles/*": ["./styles/*"],
+      "utils/*": ["./utils/*"]
+    }
+  },
+  "include": ["src", "App.tsx", "shared", "dots.d.ts", "pinchable.d.ts", "react-native-collapsible.d.ts"],
+  "exclude": [
+    "**/node_modules",
+    "src/models-edgedb/**",
+    "**/functions",
+    "**/functions-v2",
+    "**/*.spec.ts",
+    "plugins/withAndroidVerifiedLinksWorkaround.js"
+  ]
 }
