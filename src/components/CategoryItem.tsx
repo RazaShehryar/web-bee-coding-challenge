@@ -62,7 +62,7 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
       <Button mode="contained" style={styles.button} onPress={onAddField}>
         {`TITLE FIELD: ${titleField}`}
       </Button>
-      <Row alignItems="center" style={{ marginTop: 10 }}>
+      <Row alignItems="center" style={styles.bottomRow}>
         <Button
           mode="contained"
           buttonColor={Colors.white}
@@ -78,7 +78,7 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
             color={Colors.purple}
             style={styles.icon}
           />
-          <Text style={{ color: Colors.purple }}>Remove</Text>
+          <Text style={styles.removeText}>Remove</Text>
         </Row>
       </Row>
     </Column>
@@ -88,6 +88,8 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
 export default observer(CategoryItem)
 
 const styles = StyleSheet.create({
+  bottomRow: { marginTop: 10 },
+  removeText: { color: Colors.purple },
   binRow: { marginLeft: 10 },
   newFieldButton: { borderRadius: 5, borderWidth: 0.5, borderColor: `${Colors.gray}40` },
   icon: { marginRight: 6 },
