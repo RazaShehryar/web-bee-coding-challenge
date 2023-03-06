@@ -9,16 +9,11 @@
   "printWidth": 90,
   "arrowParens": "always",
   "importOrder": [
-    "^assets/(.*)$",
     "^components/(.*)$",
     "^context/(.*)$",
-    "^hooks/(.*)$",
-    "^models(.*)$",
     "^models/(.*)$",
     "^navigation/(.*)$",
     "^screens/(.*)$",
-    "^static/(.*)$",
-    "^styles/(.*)$",
     "^utils/(.*)$",
     "^[./]"
   ],

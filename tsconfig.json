@@ -18,16 +18,11 @@
     "moduleResolution": "node",
     "baseUrl": "src",
     "paths": {
-      "assets/*": ["../assets/*"],
       "components/*": ["./components/*"],
       "context/*": ["./context/*"],
-      "helpers/*": ["./helpers/*"],
-      "hooks/*": ["./hooks/*"],
       "models/*": ["./models/*"],
       "navigation/*": ["./navigation/*"],
       "screens/*": ["./screens/*"],
-      "static/*": ["./static/*"],
-      "styles/*": ["./styles/*"],
       "utils/*": ["./utils/*"]
     }
   },
