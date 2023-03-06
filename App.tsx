@@ -1,8 +1,9 @@
 import { NavigationContainer } from '@react-navigation/native'
 import { StatusBar } from 'expo-status-bar'
 import { observer } from 'mobx-react-lite'
-import { FC, useCallback, useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import { StyleSheet, View, useWindowDimensions } from 'react-native'
+import { Provider } from 'react-native-paper'
 
 import store from 'context/store'
 
@@ -28,12 +29,14 @@ const App: FC = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <NavigationContainer ref={navigationRef}>
-        <DrawerNavigator />
-      </NavigationContainer>
-      <StatusBar style="auto" />
-    </View>
+    <Provider>
+      <View style={styles.container}>
+        <NavigationContainer ref={navigationRef}>
+          <DrawerNavigator />
+        </NavigationContainer>
+        <StatusBar style="auto" />
+      </View>
+    </Provider>
   )
 }
 

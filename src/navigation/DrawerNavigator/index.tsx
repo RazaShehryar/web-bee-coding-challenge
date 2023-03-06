@@ -16,7 +16,7 @@ const DrawerNavigator: FC = () => {
   return (
     <Drawer.Navigator initialRouteName="Dashboard">
       <Drawer.Screen name="Dashboard" component={Dashboard} />
-      {categories.map((item, index) => (
+      {Object.values(categories).map((item, index) => (
         <Drawer.Screen
           key={index.toString()}
           name={item.id}

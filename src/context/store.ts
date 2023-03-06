@@ -2,11 +2,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { makeAutoObservable } from 'mobx'
 import { makePersistable } from 'mobx-persist-store'
 
-import { Category } from 'models/Category'
+import { Category, Field } from 'models/Category'
 
+const randomProperty = (obj: Record<string, Field>) => {
+  const keys = Object.keys(obj)
+  // eslint-disable-next-line no-bitwise
+  return obj[keys[(keys.length * Math.random()) << 0]]
+}
 class Store {
   isHydrated = false
-  categories: Category[] = []
+  categories: Record<string, Category> = {}
   orientation = 'PORTRAIT'
 
   constructor() {
@@ -23,49 +28,44 @@ class Store {
 
   setOrientation = (value: 'LANDSCAPE' | 'PORTRAIT') => (this.orientation = value)
 
-  addCategory = (value: Category) => this.categories.push(value)
+  addCategory = (value: Category) => (this.categories[value.id] = value)
+
+  updateTitleField = (categoryId: string, fieldId: string) =>
+    (this.categories[categoryId].titleField = fieldId)
 
   updateCategoryTitle = (text: string, categoryId: string) =>
-    (this.categories = this.categories.map((item) =>
-      item.id === categoryId ? { ...item, title: text } : item,
-    ))
+    (this.categories[categoryId].title = text)
 
   updateFieldTitle = (text: string, categoryId: string, fieldId: string) => {
-    this.categories = this.categories.map((item) =>
-      item.id === categoryId
-        ? {
-            ...item,
-            fields: {
-              ...item.fields,
-              [fieldId]: { ...item.fields[fieldId], title: text },
-            },
-          }
-        : item,
+    const alreadyExists = Object.values(this.categories[categoryId].fields).some(
+      (value) => value.title.toLowerCase() === text.toLowerCase(),
     )
+    this.categories[categoryId].fields[fieldId].title = alreadyExists
+      ? this.categories[categoryId].fields[fieldId].title
+      : text
   }
 
-  addField = (categoryId: string, fieldId: string) =>
-    (this.categories = this.categories.map((item) => {
-      if (item.id === categoryId) {
-        return {
-          ...item,
-          fields: {
-            ...item.fields,
-            [fieldId]: { id: fieldId, type: 'string', title: '' },
-          },
-        }
-      }
-      return item
-    }))
+  updateFieldType = (type: Field['type'], categoryId: string, fieldId: string) => {
+    this.categories[categoryId].fields[fieldId].type = type
+  }
 
-  removeField = (categoryId: string, fieldId: string) =>
-    (this.categories = this.categories.map((item) => {
-      if (item.id === categoryId) {
-        delete item.fields[fieldId]
-      }
-      return item
-    }))
-  removeCategory = (value: string) => this.categories.filter((item) => item.id !== value)
+  addField = (categoryId: string, fieldId: string) => {
+    this.categories[categoryId].fields[fieldId] = {
+      id: fieldId,
+      type: 'string',
+      title: '',
+    }
+  }
+
+  removeField = (categoryId: string, fieldId: string) => {
+    delete this.categories[categoryId].fields[fieldId]
+    this.categories[categoryId].titleField =
+      fieldId === this.categories[categoryId].titleField
+        ? randomProperty(this.categories[categoryId].fields)?.id ?? ''
+        : this.categories[categoryId].titleField
+  }
+
+  removeCategory = (value: string) => delete this.categories[value]
 
   setIsHydrated = (value: boolean) => (this.isHydrated = value)
 }

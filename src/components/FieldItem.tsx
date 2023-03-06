@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons'
 import { observer } from 'mobx-react-lite'
 import { FC, useCallback, useState } from 'react'
-import { GestureResponderEvent, StyleSheet } from 'react-native'
-import { Menu, Provider, Text, TextInput } from 'react-native-paper'
+import { GestureResponderEvent, StyleSheet, View } from 'react-native'
+import { Menu, Text, TextInput } from 'react-native-paper'
 
 import store from 'context/store'
 
@@ -13,6 +13,13 @@ import Colors from 'utils/colors'
 import Row from './Row'
 
 type Props = { item: Field; categoryId: string }
+
+const items: Omit<Field, 'id'>[] = [
+  { title: 'Text', type: 'string' },
+  { title: 'Checkbox', type: 'checkbox' },
+  { title: 'Number', type: 'number' },
+  { title: 'Date', type: 'date' },
+]
 
 const FieldItem: FC<Props> = ({ item, categoryId }) => {
   const [showMenu, setShowMenu] = useState(false)
@@ -26,7 +33,7 @@ const FieldItem: FC<Props> = ({ item, categoryId }) => {
       const { nativeEvent } = event
       const anchor = {
         x: nativeEvent.pageX,
-        y: nativeEvent.pageY * 0.25,
+        y: nativeEvent.pageY,
       }
 
       setMenuAnchor(anchor)
@@ -46,10 +53,18 @@ const FieldItem: FC<Props> = ({ item, categoryId }) => {
     store.removeField(categoryId, item.id)
   }, [categoryId, item.id])
 
+  const onUpdateFieldType = useCallback(
+    (type: Field['type']) => {
+      store.updateFieldType(type, categoryId, item.id)
+      closeMenu()
+    },
+    [categoryId, closeMenu, item.id],
+  )
+
   return (
-    <Provider>
+    <View style={{ zIndex: 100 }}>
       <Row alignItems="center" style={styles.container}>
-        <Row alignItems="center" style={styles.row}>
+        <Row alignItems="center" justifyContent="space-between" style={styles.row}>
           <TextInput
             mode="outlined"
             label={item.title}
@@ -59,13 +74,17 @@ const FieldItem: FC<Props> = ({ item, categoryId }) => {
             style={styles.textInput}
             placeholder="Field"
           />
-          <Text variant="titleSmall" style={styles.typeText} onPress={onTextPress}>
+          <Text variant="bodySmall" style={styles.typeText} onPress={onTextPress}>
             {item.type === 'string' ? 'TEXT' : item.type.toUpperCase()}
           </Text>
           <Menu visible={showMenu} onDismiss={closeMenu} anchor={menuAnchor}>
-            <Menu.Item title="View" />
-            <Menu.Item title="Edit" />
-            <Menu.Item title="Delete" />
+            {items.map((value) => (
+              <Menu.Item
+                key={value.type}
+                title={value.title}
+                onPress={() => onUpdateFieldType(value.type)}
+              />
+            ))}
           </Menu>
         </Row>
         <Ionicons
@@ -76,7 +95,7 @@ const FieldItem: FC<Props> = ({ item, categoryId }) => {
           onPress={onRemoveField}
         />
       </Row>
-    </Provider>
+    </View>
   )
 }
 
@@ -86,9 +105,15 @@ const styles = StyleSheet.create({
   typeText: {
     color: Colors.purple,
     marginLeft: 10,
+    width: '30%',
   },
   icon: { marginLeft: 10 },
-  textInput: { marginTop: 0, height: 46, marginBottom: 8, width: '79%' },
+  textInput: {
+    marginTop: 0,
+    height: 46,
+    marginBottom: 8,
+    width: '60%',
+  },
   container: { marginTop: 10, paddingRight: 10 },
   row: {
     borderWidth: 1,

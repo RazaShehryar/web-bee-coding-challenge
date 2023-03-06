@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons'
 import { observer } from 'mobx-react-lite'
-import { FC, useCallback, useMemo } from 'react'
-import { StyleSheet } from 'react-native'
-import { Button, Text, TextInput } from 'react-native-paper'
+import { FC, useCallback, useMemo, useState } from 'react'
+import { GestureResponderEvent, StyleSheet } from 'react-native'
+import { Button, Menu, Text, TextInput } from 'react-native-paper'
 import uuid from 'react-native-uuid'
 
 import Column from 'components/Column'
@@ -19,6 +19,9 @@ import Row from './Row'
 type Props = { item: Category; index: number }
 
 const CategoryItem: FC<Props> = ({ item, index }) => {
+  const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 })
+  const [showMenu, setShowMenu] = useState(false)
+
   const { categories } = store
 
   const onAddField = useCallback(() => {
@@ -26,17 +29,13 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
     store.addField(item.id, fieldId)
   }, [item.id])
 
-  const titleField = useMemo(() => {
-    const value = item.fields[item.titleField].title
-    if (!value) {
-      return 'UNNAMED FIELD'
-    }
-    return value.toUpperCase()
-  }, [item.fields, item.titleField])
+  const titleField = item.fields[item.titleField]?.title
+    ? item.fields[item.titleField]?.title.toUpperCase()
+    : 'UNNAMED FIELD'
 
   const isOddAndLastIndex = useMemo(
-    () => (index + 1) % 2 === 1 && index === categories.length - 1,
-    [categories.length, index],
+    () => (index + 1) % 2 === 1 && index === Object.keys(categories).length - 1,
+    [categories, index],
   )
 
   const onChangeText = useCallback(
@@ -46,12 +45,41 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
     [item.id],
   )
 
+  const openMenu = useCallback(() => setShowMenu(true), [])
+  const closeMenu = useCallback(() => setShowMenu(false), [])
+
+  const onButtonPress = useCallback(
+    (event: GestureResponderEvent) => {
+      const { nativeEvent } = event
+      const anchor = {
+        x: nativeEvent.pageX,
+        y: nativeEvent.pageY,
+      }
+
+      setMenuAnchor(anchor)
+      openMenu()
+    },
+    [openMenu],
+  )
+
+  const onUpdateTitleField = useCallback(
+    (fieldId: string) => {
+      store.updateTitleField(item.id, fieldId)
+      closeMenu()
+    },
+    [closeMenu, item.id],
+  )
+
+  const onRemoveCategory = useCallback(() => {
+    store.removeCategory(item.id)
+  }, [item.id])
+
   return (
     <Column style={[styles.container, { flex: isOddAndLastIndex ? 0.48 : 0.5 }]}>
       <Text variant="titleLarge">{item.title}</Text>
       <TextInput
         mode="outlined"
-        label={item.title}
+        label="Category Name"
         style={styles.textInput}
         onChangeText={onChangeText}
         value={item.title}
@@ -59,9 +87,18 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
       {Object.values(item.fields).map((value) => (
         <FieldItem item={value} categoryId={item.id} key={value.id} />
       ))}
-      <Button mode="contained" style={styles.button} onPress={onAddField}>
+      <Button mode="contained" style={styles.button} onPress={onButtonPress}>
         {`TITLE FIELD: ${titleField}`}
       </Button>
+      <Menu visible={showMenu} onDismiss={closeMenu} anchor={menuAnchor}>
+        {Object.values(item.fields).map((value) => (
+          <Menu.Item
+            key={value.id}
+            title={value.title}
+            onPress={() => onUpdateTitleField(value.id)}
+          />
+        ))}
+      </Menu>
       <Row alignItems="center" style={styles.bottomRow}>
         <Button
           mode="contained"
@@ -71,7 +108,7 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
           onPress={onAddField}>
           ADD NEW FIELD
         </Button>
-        <Row style={styles.binRow}>
+        <Row style={styles.binRow} onPress={onRemoveCategory}>
           <Ionicons
             name="trash-bin-sharp"
             size={24}
@@ -105,5 +142,6 @@ const styles = StyleSheet.create({
     flex: 0.5,
     margin: 5,
     padding: 10,
+    zIndex: 100,
   },
 })
