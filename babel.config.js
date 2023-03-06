@@ -2,6 +2,11 @@ module.exports = function (api) {
   api.cache.using(() => process.env.NODE_ENV);
   return {
     presets: ["babel-preset-expo"],
+    env: {
+      production: {
+        plugins: ["react-native-paper/babel"],
+      },
+    },
     plugins: [
       ["@babel/plugin-proposal-export-namespace-from"],
       [
