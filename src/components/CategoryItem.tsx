@@ -36,7 +36,7 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
   const isOddAndLastIndex = useMemo(
     () =>
       (index + 1) % 2 === 1 &&
-      Object.keys(categories).length &&
+      Object.keys(categories).length > 1 &&
       index === Object.keys(categories).length - 1,
     [categories, index],
   )

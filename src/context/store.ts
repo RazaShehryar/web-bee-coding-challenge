@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import cloneDeep from 'lodash/cloneDeep'
 import omit from 'lodash/omit'
 import { makeAutoObservable } from 'mobx'
 import { makePersistable } from 'mobx-persist-store'
@@ -6,11 +7,8 @@ import { makePersistable } from 'mobx-persist-store'
 import { Category, Field } from 'models/Category'
 import { MachineType, MachineTypeValue } from 'models/MachineType'
 
-const randomProperty = (obj: Record<string, Field>) => {
-  const keys = Object.keys(obj)
-  // eslint-disable-next-line no-bitwise
-  return obj[keys[(keys.length * Math.random()) << 0]]
-}
+import { pickRandomField } from 'utils/pickRandomField'
+
 class Store {
   isHydrated = false
   categories: Record<string, Category> = {}
@@ -75,16 +73,9 @@ class Store {
     itemId: string,
     fieldItem: MachineTypeValue,
   ) => {
-    this.items = {
-      ...this.items,
-      [itemId]: {
-        ...this.items[itemId],
-        fields: {
-          ...this.items[itemId].fields,
-          [fieldItem.fieldId]: { ...fieldItem, value: text },
-        },
-      },
-    }
+    const items = cloneDeep(this.items)
+    items[itemId].fields[fieldItem.fieldId].value = text
+    this.items = items
   }
   updateTitleField = (categoryId: string, fieldId: string) =>
     (this.categories[categoryId].titleField = fieldId)
@@ -110,10 +101,17 @@ class Store {
   }
 
   addField = (categoryId: string, fieldId: string) => {
+    const length = Object.keys(this.categories[categoryId].fields ?? {}).length
     this.categories[categoryId].fields[fieldId] = {
       id: fieldId,
       type: 'string',
       title: '',
+    }
+    if (!length) {
+      this.categories[categoryId] = {
+        ...this.categories[categoryId],
+        titleField: fieldId,
+      }
     }
   }
 
@@ -121,7 +119,7 @@ class Store {
     delete this.categories[categoryId].fields[fieldId]
     this.categories[categoryId].titleField =
       fieldId === this.categories[categoryId].titleField
-        ? randomProperty(this.categories[categoryId].fields)?.id ?? ''
+        ? pickRandomField(this.categories[categoryId].fields)?.id ?? ''
         : this.categories[categoryId].titleField
   }
 
