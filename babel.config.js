@@ -1,33 +1,33 @@
 module.exports = function (api) {
-  api.cache.using(() => process.env.NODE_ENV);
+  api.cache.using(() => process.env.NODE_ENV)
   return {
-    presets: ["babel-preset-expo"],
+    presets: ['babel-preset-expo'],
     env: {
       production: {
-        plugins: ["react-native-paper/babel"],
+        plugins: ['react-native-paper/babel'],
       },
     },
     plugins: [
-      ["@babel/plugin-proposal-export-namespace-from"],
+      ['@babel/plugin-proposal-export-namespace-from'],
       [
-        "module-resolver",
+        'module-resolver',
         {
           // extensions: ['.ts', '.tsx', '.js', '.jsx'],
           alias: {
-            assets: "./assets",
-            components: "./src/components",
-            context: "./src/context",
-            helpers: "./src/helpers",
-            hooks: "./src/hooks",
-            navigation: "./src/navigation",
-            screens: "./src/screens",
-            static: "./src/static",
-            styles: "./src/styles",
-            utils: "./src/utils",
+            assets: './assets',
+            components: './src/components',
+            context: './src/context',
+            helpers: './src/helpers',
+            hooks: './src/hooks',
+            navigation: './src/navigation',
+            screens: './src/screens',
+            static: './src/static',
+            styles: './src/styles',
+            utils: './src/utils',
           },
         },
       ],
-      "react-native-reanimated/plugin",
+      'react-native-reanimated/plugin',
     ],
-  };
-};
+  }
+}

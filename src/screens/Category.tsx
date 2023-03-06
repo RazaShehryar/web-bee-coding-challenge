@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { View } from 'react-native'
 import { Button } from 'react-native-paper'
 
-const Dashboard: FC = () => {
+const Category: FC = () => {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Button>Go to notifications</Button>
@@ -10,4 +10,4 @@ const Dashboard: FC = () => {
   )
 }
 
-export default Dashboard
+export default Category
