@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/build/Ionicons'
 import { useRoute } from '@react-navigation/native'
 import { observer } from 'mobx-react-lite'
 import { FC, useCallback, useMemo } from 'react'
-import { Pressable, StyleSheet } from 'react-native'
+import { Pressable, StyleSheet, ViewStyle } from 'react-native'
 import { Switch, Text, TextInput } from 'react-native-paper'
 
 import Column from 'components/Column'
@@ -13,6 +13,7 @@ import { MachineType, MachineTypeValue } from 'models/MachineType'
 
 import Colors from 'utils/colors'
 import { boolValue, inputValue } from 'utils/inputValue'
+import { isIpad, isIphone } from 'utils/platform'
 
 import Row from './Row'
 
@@ -52,14 +53,18 @@ const MachineTypeItem: FC<Props> = ({ item, index, categoryId }) => {
     return inputValue(value) || 'Unnamed Field'
   }, [item.fields, selectedCategory.titleField])
 
+  const container: ViewStyle = useMemo(
+    () => ({
+      maxWidth:
+        isOddAndLastIndex && (isIpad || (isIphone && orientation === 'LANDSCAPE'))
+          ? '49%'
+          : undefined,
+    }),
+    [isOddAndLastIndex, orientation],
+  )
+
   return (
-    <Column
-      style={[
-        styles.container,
-        {
-          maxWidth: isOddAndLastIndex && orientation === 'LANDSCAPE' ? '49%' : undefined,
-        },
-      ]}>
+    <Column style={[styles.container, container]}>
       <Text variant="titleLarge">{title}</Text>
       {Object.values?.(selectedCategory?.fields ?? {}).map((fieldItem) => {
         const field = selectedCategory.fields[fieldItem.id]

@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons'
 import { observer } from 'mobx-react-lite'
 import { FC, useCallback, useMemo, useState } from 'react'
-import { GestureResponderEvent, StyleSheet } from 'react-native'
+import { GestureResponderEvent, StyleSheet, ViewStyle } from 'react-native'
 import { Button, Menu, Text, TextInput } from 'react-native-paper'
 import uuid from 'react-native-uuid'
 
@@ -12,6 +12,7 @@ import store from 'context/store'
 import { Category } from 'models/Category'
 
 import Colors from 'utils/colors'
+import { isIpad, isIphone } from 'utils/platform'
 
 import FieldItem from './FieldItem'
 import Row from './Row'
@@ -77,14 +78,18 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
     store.removeCategory(item.id)
   }, [item.id])
 
+  const container: ViewStyle = useMemo(
+    () => ({
+      maxWidth:
+        isOddAndLastIndex && (isIpad || (isIphone && orientation === 'LANDSCAPE'))
+          ? '49%'
+          : undefined,
+    }),
+    [isOddAndLastIndex, orientation],
+  )
+
   return (
-    <Column
-      style={[
-        styles.container,
-        {
-          maxWidth: isOddAndLastIndex && orientation === 'LANDSCAPE' ? '49%' : undefined,
-        },
-      ]}>
+    <Column style={[styles.container, container]}>
       <Text variant="titleLarge">{item.title}</Text>
       <TextInput
         mode="outlined"
