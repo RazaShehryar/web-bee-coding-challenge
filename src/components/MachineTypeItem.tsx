@@ -19,7 +19,7 @@ import Row from './Row'
 type Props = { item: MachineType; index: number; categoryId?: string }
 
 const MachineTypeItem: FC<Props> = ({ item, index, categoryId }) => {
-  const { categories, items } = store
+  const { categories, items, orientation } = store
 
   const isOddAndLastIndex = useMemo(
     () =>
@@ -54,7 +54,12 @@ const MachineTypeItem: FC<Props> = ({ item, index, categoryId }) => {
 
   return (
     <Column
-      style={[styles.container, { maxWidth: isOddAndLastIndex ? '49%' : undefined }]}>
+      style={[
+        styles.container,
+        {
+          maxWidth: isOddAndLastIndex && orientation === 'LANDSCAPE' ? '49%' : undefined,
+        },
+      ]}>
       <Text variant="titleLarge">{title}</Text>
       {Object.values?.(selectedCategory?.fields ?? {}).map((fieldItem) => {
         const field = selectedCategory.fields[fieldItem.id]

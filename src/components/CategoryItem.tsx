@@ -22,7 +22,7 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 })
   const [showMenu, setShowMenu] = useState(false)
 
-  const { categories } = store
+  const { categories, orientation } = store
 
   const onAddField = useCallback(() => {
     const fieldId = uuid.v4() as string
@@ -79,7 +79,12 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
 
   return (
     <Column
-      style={[styles.container, { maxWidth: isOddAndLastIndex ? '49%' : undefined }]}>
+      style={[
+        styles.container,
+        {
+          maxWidth: isOddAndLastIndex && orientation === 'LANDSCAPE' ? '49%' : undefined,
+        },
+      ]}>
       <Text variant="titleLarge">{item.title}</Text>
       <TextInput
         mode="outlined"
