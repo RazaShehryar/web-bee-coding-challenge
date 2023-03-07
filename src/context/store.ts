@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import cloneDeep from 'lodash/cloneDeep'
 import omit from 'lodash/omit'
 import { makeAutoObservable } from 'mobx'
 import { makePersistable } from 'mobx-persist-store'
@@ -15,12 +14,13 @@ class Store {
   items: Record<string, MachineType> = {}
   orientation = 'PORTRAIT'
   selectedDateItem: null | (MachineTypeValue & { id: string }) = null
+  titles: Record<string, string> = {}
 
   constructor() {
     makeAutoObservable(this)
     makePersistable(this, {
       name: 'Store',
-      properties: ['categories', 'items'],
+      properties: ['categories', 'items', 'titles'],
       storage: AsyncStorage,
       stringify: true,
     })
@@ -31,6 +31,8 @@ class Store {
   setOrientation = (value: 'LANDSCAPE' | 'PORTRAIT') => (this.orientation = value)
 
   removeItem = (id: string) => (this.items = omit(this.items, id))
+
+  updateTitles = (value: string, fieldId: string) => (this.titles[fieldId] = value)
 
   addMachineTypeItem = (id: string, categoryId: string) => {
     this.items = {
@@ -73,9 +75,19 @@ class Store {
     itemId: string,
     fieldItem: MachineTypeValue,
   ) => {
-    const items = cloneDeep(this.items)
-    items[itemId].fields[fieldItem.fieldId].value = text
-    this.items = items
+    if (this.items[itemId].fields[fieldItem.fieldId]) {
+      this.items[itemId].fields[fieldItem.fieldId].value = text
+    } else {
+      this.items[itemId].fields = {
+        ...this.items[itemId].fields,
+        [fieldItem.fieldId]: {
+          ...this.items[itemId].fields[fieldItem.fieldId],
+          value: text,
+        },
+      }
+    }
+
+    this.updateTitles(text.toString(), itemId)
   }
   updateTitleField = (categoryId: string, fieldId: string) =>
     (this.categories[categoryId].titleField = fieldId)

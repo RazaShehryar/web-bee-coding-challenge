@@ -48,11 +48,6 @@ const MachineTypeItem: FC<Props> = ({ item, index, categoryId }) => {
     store.removeItem(item.id)
   }, [item.id])
 
-  const title = useMemo(() => {
-    const { value } = item.fields[selectedCategory.titleField] || {}
-    return inputValue(value) || 'Unnamed Field'
-  }, [item.fields, selectedCategory.titleField])
-
   const container: ViewStyle = useMemo(
     () => ({
       maxWidth:
@@ -63,9 +58,11 @@ const MachineTypeItem: FC<Props> = ({ item, index, categoryId }) => {
     [isOddAndLastIndex, orientation],
   )
 
+  const { titles } = store
+
   return (
     <Column style={[styles.container, container]}>
-      <Text variant="titleLarge">{title}</Text>
+      <Text variant="titleLarge">{titles[item.id]}</Text>
       {Object.values?.(selectedCategory?.fields ?? {}).map((fieldItem) => {
         const field = selectedCategory.fields[fieldItem.id]
         const { value } = item.fields[fieldItem.id] || {}
