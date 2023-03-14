@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import update from 'immutability-helper'
 import omit from 'lodash/omit'
 import { makeAutoObservable } from 'mobx'
 import { makePersistable } from 'mobx-persist-store'
@@ -14,13 +15,12 @@ class Store {
   items: Record<string, MachineType> = {}
   orientation = 'PORTRAIT'
   selectedDateItem: null | (MachineTypeValue & { id: string }) = null
-  titles: Record<string, string> = {}
 
   constructor() {
     makeAutoObservable(this)
     makePersistable(this, {
       name: 'Store',
-      properties: ['categories', 'items', 'titles'],
+      properties: ['categories', 'items'],
       storage: AsyncStorage,
       stringify: true,
     })
@@ -31,8 +31,6 @@ class Store {
   setOrientation = (value: 'LANDSCAPE' | 'PORTRAIT') => (this.orientation = value)
 
   removeItem = (id: string) => (this.items = omit(this.items, id))
-
-  updateTitles = (value: string, fieldId: string) => (this.titles[fieldId] = value)
 
   addMachineTypeItem = (id: string, categoryId: string) => {
     this.items = {
@@ -86,17 +84,21 @@ class Store {
         },
       }
     }
-
-    this.updateTitles(text.toString(), itemId)
   }
   updateTitleField = (categoryId: string, fieldId: string) =>
-    (this.categories[categoryId].titleField = fieldId)
+    (this.categories = update(this.categories, {
+      [categoryId]: { titleField: { $set: fieldId } },
+    }))
 
   updateCategoryTitle = (text: string, categoryId: string) =>
-    (this.categories[categoryId].title = text)
+    (this.categories = update(this.categories, {
+      [categoryId]: { title: { $set: text } },
+    }))
 
   updateFieldTitle = (text: string, categoryId: string, fieldId: string) => {
-    this.categories[categoryId].fields[fieldId].title = text
+    this.categories = update(this.categories, {
+      [categoryId]: { fields: { [fieldId]: { title: { $set: text } } } },
+    })
   }
 
   checkAndFixDuplicates = (text: string, categoryId: string, fieldId: string) => {

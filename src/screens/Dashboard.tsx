@@ -4,7 +4,7 @@ import { FlatList, StyleSheet, View } from 'react-native'
 import { Button, Text } from 'react-native-paper'
 
 import Center from 'components/Center'
-import DashboardList from 'components/DashboardList'
+import MachineTypeList from 'components/MachineTypeList'
 
 import store from 'context/store'
 
@@ -15,7 +15,7 @@ import { navigate } from 'utils/navigation'
 
 const keyExtractor = (item: Category) => item.id
 const renderItem = ({ item }: { item: Category }) => (
-  <DashboardList categoryId={item.id} />
+  <MachineTypeList categoryId={item.id} scrollEnabled={false} />
 )
 
 const onPress = () => navigate('ManageCategories')

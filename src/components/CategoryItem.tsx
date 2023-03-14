@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons'
 import { observer } from 'mobx-react-lite'
-import { FC, useCallback, useMemo, useState } from 'react'
+import { FC, useCallback, useMemo, useRef, useState } from 'react'
 import { GestureResponderEvent, StyleSheet, ViewStyle } from 'react-native'
 import { Button, Menu, Text, TextInput } from 'react-native-paper'
 import uuid from 'react-native-uuid'
@@ -9,7 +9,7 @@ import Column from 'components/Column'
 
 import store from 'context/store'
 
-import { Category } from 'models/Category'
+import { Category, Field } from 'models/Category'
 
 import Colors from 'utils/colors'
 import { isIpad, isIphone } from 'utils/platform'
@@ -20,6 +20,11 @@ import Row from './Row'
 type Props = { item: Category; index: number }
 
 const CategoryItem: FC<Props> = ({ item, index }) => {
+  const [title, setTitle] = useState(
+    item.fields[item.titleField]?.title
+      ? item.fields[item.titleField]?.title.toUpperCase()
+      : 'UNNAMED FIELD',
+  )
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 })
   const [showMenu, setShowMenu] = useState(false)
 
@@ -29,10 +34,6 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
     const fieldId = uuid.v4() as string
     store.addField(item.id, fieldId)
   }, [item.id])
-
-  const titleField = item.fields[item.titleField]?.title
-    ? item.fields[item.titleField]?.title.toUpperCase()
-    : 'UNNAMED FIELD'
 
   const isOddAndLastIndex = useMemo(
     () =>
@@ -68,10 +69,15 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
 
   const onUpdateTitleField = useCallback(
     (fieldId: string) => {
+      setTitle(
+        item.fields[fieldId]?.title
+          ? item.fields[fieldId]?.title.toUpperCase()
+          : 'UNNAMED FIELD',
+      )
       store.updateTitleField(item.id, fieldId)
       closeMenu()
     },
-    [closeMenu, item.id],
+    [closeMenu, item.fields, item.id],
   )
 
   const onRemoveCategory = useCallback(() => {
@@ -88,6 +94,8 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
     [isOddAndLastIndex, orientation],
   )
 
+  const fields = useRef<Field[]>(Object.values(item.fields))
+
   return (
     <Column style={[styles.container, container]}>
       <Text variant="titleLarge">{item.title}</Text>
@@ -98,14 +106,19 @@ const CategoryItem: FC<Props> = ({ item, index }) => {
         onChangeText={onChangeText}
         value={item.title}
       />
-      {Object.values(item.fields).map((value) => (
-        <FieldItem item={value} categoryId={item.id} key={value.id} />
+      {fields.current.map((value) => (
+        <FieldItem
+          item={value}
+          categoryId={item.id}
+          key={value.id}
+          onChangeValue={(text) => setTitle(text)}
+        />
       ))}
       <Button mode="contained" style={styles.button} onPress={onButtonPress}>
-        {`TITLE FIELD: ${titleField}`}
+        {`TITLE FIELD: ${title}`}
       </Button>
       <Menu visible={showMenu} onDismiss={closeMenu} anchor={menuAnchor}>
-        {Object.values(item.fields).map((value) => (
+        {fields.current.map((value) => (
           <Menu.Item
             key={value.id}
             title={value.title}

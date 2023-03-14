@@ -1,7 +1,10 @@
+import { useRoute } from '@react-navigation/native'
 import { observer } from 'mobx-react-lite'
 import { FC, useCallback, useMemo } from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
 
+import EmptyList from 'components/EmptyList'
+import MachineListHeader from 'components/MachineListHeader'
 import MachineTypeItem from 'components/MachineTypeItem'
 
 import store from 'context/store'
@@ -10,23 +13,23 @@ import { MachineType } from 'models/MachineType'
 
 import { isIpad } from 'utils/platform'
 
-import EmptyList from './EmptyList'
-import MachineListHeader from './MachineListHeader'
-
 const keyExtractor = (item: MachineType) => item.id
 
-type Props = {
-  categoryId: string
-}
+type Props = { categoryId?: string; scrollEnabled?: boolean }
 
-const DashboardList: FC<Props> = ({ categoryId }) => {
+const MachineTypeList: FC<Props> = ({ categoryId, scrollEnabled }) => {
+  const route = useRoute()
+
   const { categories, orientation, items } = store
 
-  const category = useMemo(() => categories[categoryId], [categories, categoryId])
+  const category = useMemo(
+    () => categories[categoryId || route.name],
+    [categories, categoryId, route.name],
+  )
 
   const data = useMemo(
-    () => Object.values(items).filter((value) => value.categoryId === categoryId),
-    [categoryId, items],
+    () => Object.values(items).filter((value) => value.categoryId === category.id),
+    [category.id, items],
   )
 
   const renderItem = useCallback(
@@ -41,21 +44,21 @@ const DashboardList: FC<Props> = ({ categoryId }) => {
       <FlatList
         key={orientation}
         data={data}
+        ListEmptyComponent={EmptyList}
         ListHeaderComponent={
           <MachineListHeader title={category.title} categoryId={category.id} />
         }
-        ListEmptyComponent={EmptyList}
         renderItem={renderItem}
         numColumns={isIpad ? 2 : orientation === 'PORTRAIT' ? 1 : 2}
         keyExtractor={keyExtractor}
-        scrollEnabled={false}
         contentContainerStyle={styles.contentContainer}
+        scrollEnabled={scrollEnabled}
       />
     </View>
   )
 }
 
-export default observer(DashboardList)
+export default observer(MachineTypeList)
 
 const styles = StyleSheet.create({
   contentContainer: { paddingBottom: 80, marginVertical: 10 },

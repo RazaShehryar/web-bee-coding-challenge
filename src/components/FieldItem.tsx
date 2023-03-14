@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons'
+import debounce from 'lodash/debounce'
 import { observer } from 'mobx-react-lite'
-import { FC, useCallback, useState } from 'react'
+import { FC, useCallback, useRef, useState } from 'react'
 import {
   GestureResponderEvent,
   NativeSyntheticEvent,
@@ -18,7 +19,11 @@ import Colors from 'utils/colors'
 
 import Row from './Row'
 
-type Props = { item: Field; categoryId: string }
+type Props = {
+  item: Field
+  categoryId: string
+  onChangeValue: (text: string, id: string) => void
+}
 
 const items: Omit<Field, 'id'>[] = [
   { title: 'Text', type: 'string' },
@@ -27,7 +32,8 @@ const items: Omit<Field, 'id'>[] = [
   { title: 'Date', type: 'date' },
 ]
 
-const FieldItem: FC<Props> = ({ item, categoryId }) => {
+const FieldItem: FC<Props> = ({ item, categoryId, onChangeValue }) => {
+  const [value, setValue] = useState(item.title)
   const [showMenu, setShowMenu] = useState(false)
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 })
 
@@ -48,11 +54,20 @@ const FieldItem: FC<Props> = ({ item, categoryId }) => {
     [openMenu],
   )
 
+  const onTextChange = useRef(
+    debounce((text: string) => {
+      // extensive operation due to which we had to wrap it inside a debounce and declare a local state for storing the title
+      store.updateFieldTitle(text, categoryId, item.id)
+    }, 1000),
+  ).current
+
   const onChangeText = useCallback(
     (text: string) => {
-      store.updateFieldTitle(text, categoryId, item.id)
+      onChangeValue(text, item.id)
+      setValue(text)
+      onTextChange(text)
     },
-    [categoryId, item.id],
+    [item.id, onChangeValue, onTextChange],
   )
 
   const onRemoveField = useCallback(() => {
@@ -80,8 +95,8 @@ const FieldItem: FC<Props> = ({ item, categoryId }) => {
         <Row alignItems="center" justifyContent="space-between" style={styles.row}>
           <TextInput
             mode="outlined"
-            label={item.title}
-            value={item.title}
+            label={value}
+            value={value}
             onChangeText={onChangeText}
             outlineColor={`${Colors.gray}50`}
             style={styles.textInput}
@@ -92,11 +107,11 @@ const FieldItem: FC<Props> = ({ item, categoryId }) => {
             {item.type === 'string' ? 'TEXT' : item.type.toUpperCase()}
           </Text>
           <Menu visible={showMenu} onDismiss={closeMenu} anchor={menuAnchor}>
-            {items.map((value) => (
+            {items.map((state) => (
               <Menu.Item
-                key={value.type}
-                title={value.title}
-                onPress={() => onUpdateFieldType(value.type)}
+                key={state.type}
+                title={state.title}
+                onPress={() => onUpdateFieldType(state.type)}
               />
             ))}
           </Menu>
